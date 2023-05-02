@@ -60,9 +60,9 @@ class PassengerThread implements Runnable {
 
 
             StringWriter stringWriter = new StringWriter();
-            stringWriter.write("Total number of passengers: " + passengerNumber);
-            stringWriter.write("Total number of trips: " + tripNumber) ;
-            stringWriter.write("Average number of passengers per trip: " + passengerPerTrip);
+            stringWriter.write("Total number of passengers: " + passengerNumber + '\n' +"Total number of trips: " + tripNumber+ '\n'+"Average number of passengers per trip: " + passengerPerTrip );
+            /*stringWriter.write("Total number of trips: " + tripNumber) ;
+            stringWriter.write("Average number of passengers per trip: " + passengerPerTrip);*/
             String message = stringWriter.toString();
             printWriter.println(message);
 
@@ -153,8 +153,9 @@ public class Server {
                 System.out.println();
 
                 PrintWriter printWriter = new PrintWriter(connectionSocket.getOutputStream(), true);
+                int index = destinationList.indexOf(reformedClientSentence);
 
-                Thread tx = new Thread(new PassengerThread(destinationList.get(5), districtPassengerCount,  printWriter));
+                Thread tx = new Thread(new PassengerThread(destinationList.get(index), districtPassengerCount,  printWriter));
                 tx.start();
                 tx.join();
 
@@ -170,4 +171,3 @@ public class Server {
         }
     }
 }
-

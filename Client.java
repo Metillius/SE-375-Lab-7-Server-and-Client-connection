@@ -1,3 +1,4 @@
+import jdk.swing.interop.SwingInterOpUtils;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -28,6 +29,14 @@ public class Client{
         String answer= inFromServer.readLine();
         System.out.println(answer);
 
+        String ThreadAnswer = inFromServer.readLine();
+        String ThreadAnswer2 = inFromServer.readLine();
+        String ThreadAnswer3 = inFromServer.readLine();
+        System.out.println(ThreadAnswer);
+        System.out.println(ThreadAnswer2);
+        System.out.println(ThreadAnswer3);
+
+
 
 
 
@@ -36,5 +45,4 @@ public class Client{
     }
 
 }
-
 

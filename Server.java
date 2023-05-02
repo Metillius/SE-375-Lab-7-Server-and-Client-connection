@@ -7,16 +7,20 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 
 class PassengerThread implements Runnable {
     // I added final keyword to these so they are not changeable
     private final String filename;
     private final HashMap<String, int[]> districtPassengerCount;
+    private PrintWriter printWriter;
 
-    public PassengerThread(String s, HashMap<String, int[]> districtPassengerCount) {
+    public PassengerThread(String s, HashMap<String, int[]> districtPassengerCount, PrintWriter printWriter) {
         this.filename = s;
         this.districtPassengerCount = districtPassengerCount;
+        this.printWriter = printWriter;
     }
 
     public void run() {
@@ -30,7 +34,8 @@ class PassengerThread implements Runnable {
 
             int passengerNumber = 0;
             int tripNumber = 0;
-            int days = 0;
+            double passengerPerTrip =0;
+
 
             while ((line = reader.readLine()) != null) {
 
@@ -40,25 +45,41 @@ class PassengerThread implements Runnable {
 
                 tripNumber += trips;
                 passengerNumber += passengers;
-                days++;
+
+
             }
 
-            double averagePassengers = (double) passengerNumber / days;
+            passengerPerTrip = passengerNumber/tripNumber;
+
 
             CaptainKiddArr.add(String.valueOf(passengerNumber));
-            CaptainKiddArr.add(String.valueOf(averagePassengers));
+            CaptainKiddArr.add(String.valueOf(tripNumber));
 
 
-            System.out.println(filename + " Total Passengers: " + passengerNumber + " Avg Passengers: "+ averagePassengers);
+            CaptainKiddArr.add(String.valueOf(passengerPerTrip));
 
 
-            int[] counts = new int[] {passengerNumber, (int) Math.round(averagePassengers)};
-            districtPassengerCount.put(filename, counts);
+            StringWriter stringWriter = new StringWriter();
+            stringWriter.write("Total number of passengers: " + passengerNumber);
+            stringWriter.write("Total number of trips: " + tripNumber) ;
+            stringWriter.write("Average number of passengers per trip: " + passengerPerTrip);
+            String message = stringWriter.toString();
+            printWriter.println(message);
+
+            System.out.println("Total number of passengers: " + passengerNumber );
+            System.out.println("Total number of trips: " + tripNumber );
+            System.out.println("Average number of passengers per trip: " + passengerPerTrip);
+
+
+            //int[] counts = new int[] {passengerNumber, (int) Math.round(averagePassengers)};
+            //districtPassengerCount.put(filename, counts);
 
             reader.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+
     }
 }
 
@@ -74,10 +95,11 @@ public class Server {
 
 
 
-        ServerSocket welcomeSocket = new ServerSocket(193);
+        ServerSocket welcomeSocket = new ServerSocket(6789);
         while (true) {
             Socket connectionSocket = welcomeSocket.accept();
             System.out.println("Awaiting for connection");
+            System.out.println(" ");
             BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
             DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
 
@@ -98,16 +120,54 @@ public class Server {
             for (int i = 0; i < destinationList.size(); i++) {
 
 
+                System.out.println("Received file: " + destinationList.get(i));
 
-                Thread tx = new Thread(new PassengerThread(destinationList.get(i), districtPassengerCount));
+
+
+
+            /*  Thread tx = new Thread(new PassengerThread(destinationList.get(i), districtPassengerCount));
                 tx.start();
                 tx.join();
+
+             */
             }
 
+            System.out.println();
+            System.out.println("File Processing done. Awaiting for query...");
 
 
 
-      //          outToClient.writeBytes(clientSentence); // outToClient.writeBytes(capitalizedSentence);
+            //
+
+
+
+            outToClient.writeBytes("Select a district name to server to see the stats: (Type exit to quit)" + '\n');
+            System.out.println();
+            clientSentence = inFromClient.readLine();
+            String reformedClientSentence = clientSentence + ".csv";
+            System.out.println("Received query: "+ reformedClientSentence);
+            if (destinationList.contains(reformedClientSentence)){
+
+                System.out.println("Yippie-yi-o");
+                outToClient.writeBytes("Select a district name to server to see the stats: (Type exit to quit)" + '\n');
+                System.out.println();
+
+                PrintWriter printWriter = new PrintWriter(connectionSocket.getOutputStream(), true);
+
+                Thread tx = new Thread(new PassengerThread(destinationList.get(5), districtPassengerCount,  printWriter));
+                tx.start();
+                tx.join();
+
+            }
+
+            else if (clientSentence == "exit"){
+
+            }
+
+            else {
+                System.out.println("Invalid district :(((");
+            }
         }
     }
 }
+

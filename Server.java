@@ -144,30 +144,39 @@ public class Server {
             outToClient.writeBytes("Select a district name to server to see the stats: (Type exit to quit)" + '\n');
             System.out.println();
             clientSentence = inFromClient.readLine();
-            String reformedClientSentence = clientSentence + ".csv";
-            System.out.println("Received query: "+ reformedClientSentence);
-            if (destinationList.contains(reformedClientSentence)){
+            while(!clientSentence.equals("exit")){
+                String reformedClientSentence = clientSentence + ".csv";
+                System.out.println("Received query: "+ reformedClientSentence);
 
-                System.out.println("Yippie-yi-o");
+                if (destinationList.contains(reformedClientSentence)){
+
+                    System.out.println("Yippie-yi-o");
+                    outToClient.writeBytes("Here are the stats for the district: " + '\n');
+                    System.out.println();
+
+                    PrintWriter printWriter = new PrintWriter(connectionSocket.getOutputStream(), true);
+                    int index = destinationList.indexOf(reformedClientSentence);
+
+                    Thread tx = new Thread(new PassengerThread(destinationList.get(index), districtPassengerCount,  printWriter));
+                    tx.start();
+                    tx.join();
+
+                }
+
+
+                else {
+                    System.out.println("Invalid district :(((");
+                    outToClient.writeBytes("Invalid district :(((" + '\n');
+
+                }
+
                 outToClient.writeBytes("Select a district name to server to see the stats: (Type exit to quit)" + '\n');
                 System.out.println();
-
-                PrintWriter printWriter = new PrintWriter(connectionSocket.getOutputStream(), true);
-                int index = destinationList.indexOf(reformedClientSentence);
-
-                Thread tx = new Thread(new PassengerThread(destinationList.get(index), districtPassengerCount,  printWriter));
-                tx.start();
-                tx.join();
+                clientSentence = inFromClient.readLine();
 
             }
 
-            else if (clientSentence == "exit"){
 
-            }
-
-            else {
-                System.out.println("Invalid district :(((");
-            }
         }
     }
 }
